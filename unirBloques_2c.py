@@ -389,6 +389,7 @@ for idx_grupo, grupo in enumerate(grupos[:5]):  # Solo primeros 5 grupos para pr
         '-i', video,
         '-ss', inicio_str,
         '-to', fin_str,
+        '-af', 'volume=5dB',  # ← Aumentar 5 decibeles
         '-q:a', '2',
         '-map', '0:a',
         '-y',
