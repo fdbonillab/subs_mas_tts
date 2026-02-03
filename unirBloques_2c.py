@@ -8,6 +8,7 @@ from datetime import datetime
 # Configuración
 video = 'The.Matrix.1999.mp4'
 subs = pysrt.open('The Matrix (1999)-en.srt')
+subs_es = pysrt.open('The Matrix (1999)-es.srt')
 # Configuración de TTS (Text-to-Speech)
 TTS_ENGINE = "win"  # "edge" (Microsoft Edge TTS) o "win" (Windows TTS)
 TTS_VOICE = "en-US-AriaNeural"  # Voz para Edge TTS
@@ -159,7 +160,64 @@ def tts_con_windows(texto, archivo_salida):
     except Exception as e:
         print(f"  ❌ Error con Windows TTS: {e}")
         return False
-
+def tts_con_windows_es(texto, archivo_salida):
+    """
+    Convierte texto a audio usando Windows TTS nativo con voz en español
+    """
+    try:
+        import comtypes.client
+        
+        # Crear objeto TTS de Windows
+        speaker = comtypes.client.CreateObject("SAPI.SpVoice")
+        
+        # Buscar y seleccionar una voz en español
+        voces = speaker.GetVoices()
+        voz_encontrada = False
+        
+        # Nombres comunes de voces en español en Windows
+        nombres_voces_espanol = [
+            "Microsoft Sabina Desktop",  # Español (México) - Femenina
+            "Microsoft Helena Desktop",  # Español (España) - Femenina
+            "Microsoft Pablo Desktop",   # Español (España) - Masculina
+            "Microsoft Raul Desktop",    # Español (México) - Masculina
+            "Español", "Spanish", "es-ES", "es-MX"
+        ]
+        
+        for voz in voces:
+            descripcion = voz.GetDescription()
+            print(f"Voz disponible: {descripcion}")  # Para debug
+            
+            # Buscar cualquier voz que contenga referencia a español
+            for nombre in nombres_voces_espanol:
+                if nombre.lower() in descripcion.lower():
+                    speaker.Voice = voz
+                    voz_encontrada = True
+                    print(f"Voz seleccionada: {descripcion}")
+                    break
+            
+            if voz_encontrada:
+                break
+        
+        if not voz_encontrada:
+            print("ADVERTENCIA: No se encontró voz en español, usando voz por defecto")
+            print(f"Voz por defecto: {speaker.Voice.GetDescription()}")
+        
+        # Configurar salida a archivo
+        stream = comtypes.client.CreateObject("SAPI.SpFileStream")
+        stream.Open(archivo_salida, 3, False)  # 3 = SSFMCreateForWrite
+        speaker.AudioOutputStream = stream
+        
+        # Hablar texto
+        speaker.Speak(texto)
+        
+        # Cerrar stream
+        stream.Close()
+        
+        return os.path.exists(archivo_salida)
+        
+    except Exception as e:
+        print(f"Error en TTS: {e}")
+        return False
 def tts_con_pyttsx3(texto, archivo_salida):
     """
     Alternativa usando pyttsx3 (multiplataforma)
@@ -182,7 +240,7 @@ def tts_con_pyttsx3(texto, archivo_salida):
         print("  ❌ pyttsx3 no está instalado. Instala con: pip install pyttsx3")
         return False
 
-def texto_a_audio(texto, archivo_salida, grupo_id):
+def texto_a_audio(texto, archivo_salida, grupo_id, idioma = 1 ):
     """
     Convierte texto a audio usando el método configurado
     """
@@ -199,7 +257,10 @@ def texto_a_audio(texto, archivo_salida, grupo_id):
     if TTS_ENGINE == "edge":
         exito = tts_con_edge(texto_limpio, archivo_salida)
     elif TTS_ENGINE == "win":
-        exito = tts_con_windows(texto_limpio, archivo_salida)
+        if idioma == 1:
+            exito = tts_con_windows(texto_limpio, archivo_salida)
+        elif idioma == 2:
+            exito = tts_con_windows_es(texto_limpio, archivo_salida)
     elif TTS_ENGINE == "pyttsx3":
         exito = tts_con_pyttsx3(texto_limpio, archivo_salida)
     else:
@@ -339,7 +400,9 @@ print(f"(Uniendo bloques con menos de {MAX_ESPACIO_ENTRE_BLOQUES} segundo de sep
 
 # 2. Extraer cada grupo 
 ### (grupos[:5])
-for idx_grupo, grupo in enumerate(grupos[:5]):  # Solo primeros 5 grupos para prueba
+len_prueba = 5
+lim_muestra =  5 ##len(grupos)##50
+for idx_grupo, grupo in enumerate(grupos[:lim_muestra]):  # Solo primeros 5 grupos para prueba
     if len(grupo) == 0:
         continue
     
@@ -396,17 +459,25 @@ for idx_grupo, grupo in enumerate(grupos[:5]):  # Solo primeros 5 grupos para pr
         output_file
     ]
     texto_para_tts = ""
+    texto_para_tts_esp = ""
     for subtitle in subs[primer_idx:ultimo_idx + 1]:
         texto_para_tts += subtitle.text + " "
+    for subtitle in subs_es[primer_idx:ultimo_idx + 1]:
+        texto_para_tts_esp += subtitle.text + " "
     ### let texto_para_tts = subs[primer_idx] + subs[primer_idx+1]
     archivo_salida = "tts_"+str(primer_idx)+".mp3"
+    archivo_salida_esp = "tts_es_"+str(primer_idx)+".mp3"
     print(" archivo_salida tts "+archivo_salida)
+    print(" archivo_salida tts es "+archivo_salida_esp)
     tts_audio =  texto_a_audio(texto_para_tts, archivo_salida, primer_idx)
+    tts_audio_es =  texto_a_audio(texto_para_tts_esp, archivo_salida_esp, primer_idx,idioma=2)
     ####  primero el tts
-    if idx_grupo < len(grupos[:50]) - 1 and tts_audio:
+    if idx_grupo < len(grupos[:lim_muestra]) - 1 and tts_audio:
+        archivos_temporales.append(archivo_salida_esp)
         archivos_temporales.append(archivo_salida)
+
     # Añadir tono de separación (excepto después del último grupo)
-    if idx_grupo < len(grupos[:50]) - 1 and tono_separador:
+    if idx_grupo < len(grupos[:lim_muestra]) - 1 and tono_separador:
         archivos_temporales.append(tono_separador)
     ##### para q se escuche primero  el tts
     archivos_temporales.append(output_file)
