@@ -1,0 +1,10 @@
+TONOS SUAVES CREADOS PARA AUDIOLIBRO
+========================================
+
+- tono_muy_suave_320hz.mp3
+- tono_suave_medio_350hz.mp3
+- tono_estandar_400hz.mp3
+- tono_corto_450hz.mp3
+- tono_con_fade_500hz.mp3
+- tono_intermedio_550hz.mp3
+- tono_largo_fade_600hz.mp3

@@ -15,6 +15,9 @@ TTS_VOICE = "en-US-AriaNeural"  # Voz para Edge TTS
 TTS_RATE = "+0%"  # Velocidad del habla
 TTS_VOLUME = "+0%"  # Volumen
 
+tono_suave_320 = "tono_320hz_campana.mp3"
+sonido_silencio = "tono_silence_1845.mp3"
+
 # Configuración de mezcla de audio
 VOLUMEN_AUDIO_ORIGINAL = 1 ## 0.3  # 30% volumen para audio original
 VOLUMEN_TTS = 1.0  # 100% volumen para TTS
@@ -352,6 +355,8 @@ grupo_actual = []
 archivos_temporales = []
 archivos_tonos = []
 
+archivosYaGenerados = True
+
 MARGEN_FIN_GRUPO = 1.0  # Margen al final de cada grupo (cambiaste de 0.1 a 1)
 TIPO_TONO = "beep"  # Opciones: "beep", "click", "silence", "fade"
 DURACION_TONO = 1 ###  0.3  # Duración del tono en segundos
@@ -445,19 +450,19 @@ for idx_grupo, grupo in enumerate(grupos[:lim_muestra]):  # Solo primeros 5 grup
         print(f"  {j+1}. [{tiempo_sub}] {sub.text[:60]}...")
     
     print(f"Extrayendo a: {output_file}")
-    
-    # Comando FFmpeg
-    cmd = [
-        'ffmpeg',
-        '-i', video,
-        '-ss', inicio_str,
-        '-to', fin_str,
-        '-af', 'volume=5dB',  # ← Aumentar 5 decibeles
-        '-q:a', '2',
-        '-map', '0:a',
-        '-y',
-        output_file
-    ]
+    if archivosYaGenerados == False:
+        # Comando FFmpeg
+        cmd = [
+            'ffmpeg',
+            '-i', video,
+            '-ss', inicio_str,
+            '-to', fin_str,
+            '-af', 'volume=5dB',  # ← Aumentar 5 decibeles
+            '-q:a', '2',
+            '-map', '0:a',
+            '-y',
+            output_file
+        ]
     texto_para_tts = ""
     texto_para_tts_esp = ""
     for subtitle in subs[primer_idx:ultimo_idx + 1]:
@@ -469,11 +474,16 @@ for idx_grupo, grupo in enumerate(grupos[:lim_muestra]):  # Solo primeros 5 grup
     archivo_salida_esp = "tts_es_"+str(primer_idx)+".mp3"
     print(" archivo_salida tts "+archivo_salida)
     print(" archivo_salida tts es "+archivo_salida_esp)
-    tts_audio =  texto_a_audio(texto_para_tts, archivo_salida, primer_idx)
-    tts_audio_es =  texto_a_audio(texto_para_tts_esp, archivo_salida_esp, primer_idx,idioma=2)
+    tts_audio
+    if archivosYaGenerados == False:
+        tts_audio =  texto_a_audio(texto_para_tts, archivo_salida, primer_idx)
+        tts_audio_es =  texto_a_audio(texto_para_tts_esp, archivo_salida_esp, primer_idx,idioma=2)
     ####  primero el tts
-    if idx_grupo < len(grupos[:lim_muestra]) - 1 and tts_audio:
+    if idx_grupo < len(grupos[:lim_muestra]) - 1 and ( tts_audio or archivosYaGenerados ) :
         archivos_temporales.append(archivo_salida_esp)
+        if idx_grupo < len(grupos[:lim_muestra]) - 1 and tono_separador:
+            archivos_temporales.append(sonido_silencio)
+            archivos_temporales.append(tono_suave_320)
         archivos_temporales.append(archivo_salida)
 
     # Añadir tono de separación (excepto después del último grupo)
