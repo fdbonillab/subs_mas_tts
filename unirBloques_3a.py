@@ -72,7 +72,7 @@ def normalizar_archivos(lista_archivos, temp_dir="temp_normalized"):
             '-y',
             output
         ]
-        
+        print(f" normalizando {output}")
         subprocess.run(cmd, check=True, capture_output=True)
         archivos_normalizados.append(output)
     
@@ -474,7 +474,7 @@ for idx_grupo, grupo in enumerate(grupos[:lim_muestra]):  # Solo primeros 5 grup
     archivo_salida_esp = "tts_es_"+str(primer_idx)+".mp3"
     print(" archivo_salida tts "+archivo_salida)
     print(" archivo_salida tts es "+archivo_salida_esp)
-    tts_audio
+    tts_audio = 0
     if archivosYaGenerados == False:
         tts_audio =  texto_a_audio(texto_para_tts, archivo_salida, primer_idx)
         tts_audio_es =  texto_a_audio(texto_para_tts_esp, archivo_salida_esp, primer_idx,idioma=2)
@@ -484,40 +484,44 @@ for idx_grupo, grupo in enumerate(grupos[:lim_muestra]):  # Solo primeros 5 grup
         if idx_grupo < len(grupos[:lim_muestra]) - 1 and tono_separador:
             archivos_temporales.append(sonido_silencio)
             archivos_temporales.append(tono_suave_320)
+            archivos_temporales.append(sonido_silencio)
         archivos_temporales.append(archivo_salida)
 
     # Añadir tono de separación (excepto después del último grupo)
     if idx_grupo < len(grupos[:lim_muestra]) - 1 and tono_separador:
-        archivos_temporales.append(tono_separador)
+        archivos_temporales.append(sonido_silencio)
+        archivos_temporales.append(tono_suave_320)
+        archivos_temporales.append(sonido_silencio)
     ##### para q se escuche primero  el tts
     archivos_temporales.append(output_file)
     
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    
-    if result.returncode == 0:
-        print(f"✅ Extraído: {output_file}")
+    if archivosYaGenerados == False :
+        result = subprocess.run(cmd, capture_output=True, text=True)
         
-        # Verificar duración real
-        cmd_check = [
-            'ffprobe',
-            '-v', 'error',
-            '-show_entries', 'format=duration',
-            '-of', 'default=noprint_wrappers=1:nokey=1',
-            output_file
-        ]
-        
-        check_result = subprocess.run(cmd_check, capture_output=True, text=True)
-        if check_result.returncode == 0:
-            actual_duration = float(check_result.stdout.strip())
-            print(f"   Duración real: {actual_duration:.2f}s (esperada: {duracion_grupo:.2f}s)")
+        if result.returncode == 0:
+            print(f"✅ Extraído: {output_file}")
             
-            diferencia = abs(actual_duration - duracion_grupo)
-            if diferencia > 0.1:
-                print(f"   ⚠️  Diferencia: {diferencia:.3f}s")
-    else:
-        print(f"❌ Error: {result.stderr[:200]}")
-    
-    print()
+            # Verificar duración real
+            cmd_check = [
+                'ffprobe',
+                '-v', 'error',
+                '-show_entries', 'format=duration',
+                '-of', 'default=noprint_wrappers=1:nokey=1',
+                output_file
+            ]
+            
+            check_result = subprocess.run(cmd_check, capture_output=True, text=True)
+            if check_result.returncode == 0:
+                actual_duration = float(check_result.stdout.strip())
+                print(f"   Duración real: {actual_duration:.2f}s (esperada: {duracion_grupo:.2f}s)")
+                
+                diferencia = abs(actual_duration - duracion_grupo)
+                if diferencia > 0.1:
+                    print(f"   ⚠️  Diferencia: {diferencia:.3f}s")
+        else:
+            print(f"❌ Error: {result.stderr[:200]}")
+        
+        print()
 
 # 3. Combinar todos los grupos en un solo archivo
 if archivos_temporales:
