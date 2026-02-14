@@ -493,7 +493,11 @@ for idx_grupo, grupo in enumerate(grupos[:lim_muestra]):  # Solo primeros 5 grup
         archivos_temporales.append(tono_suave_320)
         archivos_temporales.append(sonido_silencio)
     ##### para q se escuche primero  el tts
-    archivos_temporales.append(output_file)
+    ### archivos_temporales.append(output_file)
+    if idx_grupo < len(grupos[:lim_muestra]) - 1 and tono_separador:
+        archivos_temporales.append(sonido_silencio)
+        archivos_temporales.append(tono_suave_320)
+        archivos_temporales.append(sonido_silencio)
     
     if archivosYaGenerados == False :
         result = subprocess.run(cmd, capture_output=True, text=True)
