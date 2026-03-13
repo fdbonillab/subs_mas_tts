@@ -7,8 +7,10 @@ from datetime import datetime
 
 # Configuración
 video = 'The.Matrix.1999.mp4'
-subs = pysrt.open('The Matrix (1999)-en.srt')
-subs_es = pysrt.open('The Matrix (1999)-es.srt')
+
+##### si es pelicula nueva o a reprocesar desde 0 mirar la variable archivosYaGenerados
+subs = pysrt.open('Pirates.Of.Silicon.Valley_en.srt')
+subs_es = pysrt.open('Pirates.Of.Silicon.Valley_en.srt')
 # Configuración de TTS (Text-to-Speech)
 TTS_ENGINE = "win"  # "edge" (Microsoft Edge TTS) o "win" (Windows TTS)
 TTS_VOICE = "en-US-AriaNeural"  # Voz para Edge TTS
@@ -73,9 +75,13 @@ def normalizar_archivos(lista_archivos, temp_dir="temp_normalized"):
             output
         ]
         print(f" normalizando {output}")
-        subprocess.run(cmd, check=True, capture_output=True)
-        archivos_normalizados.append(output)
-    
+        try :
+            subprocess.run(cmd, check=True, capture_output=True)
+            archivos_normalizados.append(output)
+        except Exception as e:
+            print(f"Error en normalizar archivos : {e}")
+            ##return False
+
     return archivos_normalizados
 
 def concatenar_normalizados(lista_normalizados, output_final):
@@ -355,7 +361,7 @@ grupo_actual = []
 archivos_temporales = []
 archivos_tonos = []
 
-archivosYaGenerados = True
+archivosYaGenerados = False ##### esto cambia para generar de nuevos los archivos por ejemplo para hacerle el proceso a una nueva pelicula
 
 MARGEN_FIN_GRUPO = 1.0  # Margen al final de cada grupo (cambiaste de 0.1 a 1)
 TIPO_TONO = "beep"  # Opciones: "beep", "click", "silence", "fade"
