@@ -6,40 +6,33 @@ import re
 
 # --- Configuración ---
 CARPETA_SALIDA = "audios_muestra"
-ARCHIVO_FINAL = "todas_las_voces_en.mp3"
+ARCHIVO_FINAL = "todas_las_voces_es.mp3"
 FILELIST = "filelist.txt"
 
 # --- Mapa de regiones a nombres de países/regiones ---
 REGION_MAP = {
-    # Inglés por país/región (los que aparecen en tu lista)
-    "AU": "Australia",
-    "CA": "Canada",
-    "HK": "Hong Kong",
-    "IN": "India",
-    "IE": "Ireland",
-    "KE": "Kenya",
-    "NZ": "New Zealand",
-    "NG": "Nigeria",
-    "PH": "Philippines",
-    "US": "the United States",
-    "SG": "Singapore",
-    "ZA": "South Africa",
-    "TZ": "Tanzania",
-    "GB": "the United Kingdom",
-
-    # Otros códigos de inglés que podrían aparecer
-    "AE": "the United Arab Emirates",
-    "CH": "Switzerland",
-    "MY": "Malaysia",
-
-    # Si también quieres soporte para otros idiomas, puedes agregar:
-    # "ES": "Spain",
-    # "MX": "Mexico",
-    # "AR": "Argentina",
-    # "CO": "Colombia",
-    # "FR": "France",
-    # "DE": "Germany",
-    # etc.
+    "AR": "Argentina",
+    "BO": "Bolivia",
+    "CL": "Chile",
+    "CO": "Colombia",
+    "CR": "Costa Rica",
+    "CU": "Cuba",
+    "DO": "República Dominicana",
+    "EC": "Ecuador",
+    "SV": "El Salvador",
+    "GQ": "Guinea Ecuatorial",
+    "GT": "Guatemala",
+    "HN": "Honduras",
+    "MX": "México",
+    "NI": "Nicaragua",
+    "PA": "Panamá",
+    "PY": "Paraguay",
+    "PE": "Perú",
+    "PR": "Puerto Rico",
+    "ES": "España",
+    "US": "Estados Unidos",
+    "UY": "Uruguay",
+    "VE": "Venezuela",
 }
 
 def extract_region(voice_name):
@@ -78,13 +71,13 @@ async def generar_muestra(voice_name):
     voice_name_clean = extract_voice_name(voice_name)
     if region_code:
         region_name = get_region_name(region_code)
-        texto = (f"Hello my friend, welcome to New York. "
-                 f"This is the voice from {region_name}. "
-                 f"I am {voice_name_clean}, nice to meet you.")
+        texto = (f"Hola mi amigo, bienvenido a soacha. "
+                 f"esto te llega desde  {region_name}. "
+                 f"Yo soy {voice_name_clean}, milagro de verlo.")
     else:
-        texto = (f"Hello my friend, welcome to New York. "
-                 f"This is the voice {voice_name}. "
-                 f"I am {voice_name_clean}, nice to meet you.")
+        texto = (f"Hola mi amigo, bienvenido a soacha. "
+                 f"esto te llega desde  {voice_name}. "
+                 f"Yo soy {voice_name_clean}, milagro de verlo.")
     
     nombre_archivo = sanitize_filename(voice_name)
     archivo_mp3 = os.path.join(CARPETA_SALIDA, f"muestra_{nombre_archivo}.mp3")
@@ -133,14 +126,14 @@ async def main():
     print(f"Se encontraron {len(voces)} voces en total.")
     
     # Filtrar solo las voces que empiezan con "en-"
-    voces_en = [v for v in voces if v['ShortName'].startswith('en-')]
+    ##voces_en = [v for v in voces if v['ShortName'].startswith('en-')]
     voces_es = [v for v in voces if v['ShortName'].startswith('es-')]
     print(f"Voces en inglés disponibles: {len(voces_es)}\n")
     
     archivos_exitosos = []
     fallos = []
     
-    for voz in voces_en:
+    for voz in voces_es:
         nombre = voz['ShortName']
         archivo = await generar_muestra(nombre)
         if archivo:

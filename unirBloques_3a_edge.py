@@ -13,10 +13,20 @@ archivosYaGenerados = False ##### esto cambia para generar de nuevos los archivo
 subs = pysrt.open('Hackers.1995.REMASTERED.1080p.BluRay.x264.DTS-FGT-en.srt')
 subs_es = pysrt.open('Hackers.1995.REMASTERED.1080p.BluRay.x264.DTS-FGT-es-419.srt')
 # Configuración de TTS (Text-to-Speech)
-TTS_ENGINE = "win"  # "edge" (Microsoft Edge TTS) o "win" (Windows TTS)
-TTS_VOICE = "en-US-AriaNeural"  # Voz para Edge TTS
-TTS_RATE = "+0%"  # Velocidad del habla
-TTS_VOLUME = "+0%"  # Volumen
+
+##TTS_ENGINE = "win"  # "edge" (Microsoft Edge TTS) o "win" (Windows TTS)
+##TTS_VOICE = "en-US-AriaNeural"  # Voz para Edge TTS
+##TTS_RATE = "+0%"  # Velocidad del habla
+#TTS_VOLUME = "+0%"  # Volumen
+
+# Configuración de TTS (Text-to-Speech)
+TTS_ENGINE = "edge"                # Cambiado de "win" a "edge"
+TTS_VOICE_EN = "en-CA-LiamNeural"  # Voz para inglés (puedes cambiarla) es-AR-ElenaNeural
+TTS_VOICE_ES = "es-AR-ElenaNeural"  ###"en-AU-NatashaNeural"  # Voz australiana para español (tal como pediste)
+TTS_RATE = "+0%"
+TTS_VOLUME = "+0%"
+
+
 
 tono_suave_320 = "tono_320hz_campana.mp3"
 sonido_silencio = "tono_silence_1845.mp3"
@@ -113,10 +123,9 @@ def concatenar_normalizados(lista_normalizados, output_final):
     os.remove(lista_file)
     return output_final
 
-def tts_con_edge(texto, archivo_salida, voz=TTS_VOICE, rate=TTS_RATE):
+def tts_con_edge(texto, archivo_salida, voz=TTS_VOICE_EN, rate=TTS_RATE):
     """
-    Convierte texto a audio usando Microsoft Edge TTS (gratuito, buena calidad)
-    Requiere: pip install edge-tts
+    Convierte texto a audio usando Microsoft Edge TTS
     """
     try:
         import asyncio
@@ -126,14 +135,9 @@ def tts_con_edge(texto, archivo_salida, voz=TTS_VOICE, rate=TTS_RATE):
             communicate = edge_tts.Communicate(texto, voz)
             await communicate.save(archivo_salida)
         
-        # Ejecutar la función asíncrona
         asyncio.run(generar_audio())
         
-        if os.path.exists(archivo_salida):
-            return True
-        else:
-            return False
-            
+        return os.path.exists(archivo_salida)
     except ImportError:
         print("  ❌ edge-tts no está instalado. Instala con: pip install edge-tts")
         return False
@@ -250,22 +254,23 @@ def tts_con_pyttsx3(texto, archivo_salida):
         print("  ❌ pyttsx3 no está instalado. Instala con: pip install pyttsx3")
         return False
 
-def texto_a_audio(texto, archivo_salida, grupo_id, idioma = 1 ):
+def texto_a_audio(texto, archivo_salida, grupo_id, idioma=1):
     """
-    Convierte texto a audio usando el método configurado
+    Convierte texto a audio usando el método configurado.
+    idioma: 1 = inglés, 2 = español
     """
     print(f"  🔊 Convirtiendo texto a audio (Grupo {grupo_id})...")
     print(f"  📝 Texto: {texto[:100]}..." if len(texto) > 100 else f"  📝 Texto: {texto}")
     
-    # Limpiar texto para TTS (remover caracteres especiales)
     texto_limpio = texto.replace('\n', ' ').replace('  ', ' ').strip()
-    
     if not texto_limpio:
         print("  ⚠️  Texto vacío, omitiendo...")
         return False
     
     if TTS_ENGINE == "edge":
-        exito = tts_con_edge(texto_limpio, archivo_salida)
+        # Seleccionar voz según idioma
+        voz = TTS_VOICE_ES if idioma == 2 else TTS_VOICE_EN
+        exito = tts_con_edge(texto_limpio, archivo_salida, voz=voz, rate=TTS_RATE)
     elif TTS_ENGINE == "win":
         if idioma == 1:
             exito = tts_con_windows(texto_limpio, archivo_salida)
