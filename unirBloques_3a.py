@@ -9,8 +9,8 @@ from datetime import datetime
 video = 'The.Matrix.1999.mp4'
 
 ##### si es pelicula nueva o a reprocesar desde 0 mirar la variable archivosYaGenerados
-subs = pysrt.open('Pirates.Of.Silicon.Valley_en.srt')
-subs_es = pysrt.open('Pirates.Of.Silicon.Valley_en.srt')
+subs = pysrt.open('Hackers.1995.REMASTERED.1080p.BluRay.x264.DTS-FGT-en.srt')
+subs_es = pysrt.open('Hackers.1995.REMASTERED.1080p.BluRay.x264.DTS-FGT-es-419.srt')
 # Configuración de TTS (Text-to-Speech)
 TTS_ENGINE = "win"  # "edge" (Microsoft Edge TTS) o "win" (Windows TTS)
 TTS_VOICE = "en-US-AriaNeural"  # Voz para Edge TTS
@@ -20,7 +20,7 @@ TTS_VOLUME = "+0%"  # Volumen
 tono_suave_320 = "tono_320hz_campana.mp3"
 sonido_silencio = "tono_silence_1845.mp3"
 
-# Configuración de mezcla de audio
+# Configuración de mezcla de audioase4 
 VOLUMEN_AUDIO_ORIGINAL = 1 ## 0.3  # 30% volumen para audio original
 VOLUMEN_TTS = 1.0  # 100% volumen para TTS
 
